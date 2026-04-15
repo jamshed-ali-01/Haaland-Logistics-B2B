@@ -41,6 +41,9 @@
                 <x-sidebar-link :href="route('admin.rates')" :active="request()->routeIs('admin.rates')" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z">
                     {{ __('Rates') }}
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.leads')" :active="request()->routeIs('admin.leads')" icon="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206">
+                    {{ __('Inquiries') }}
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.services')" :active="request()->routeIs('admin.services')" icon="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
                     {{ __('Services') }}
                 </x-sidebar-link>

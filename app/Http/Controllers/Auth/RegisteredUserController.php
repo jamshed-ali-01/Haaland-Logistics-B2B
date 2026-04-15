@@ -50,41 +50,47 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Conversion Logic: Create Quote from Lead data if present
-        if ($request->lead_id && $request->origin_id && $request->country_id) {
-            try {
-                $logistics = app(LogisticsService::class);
-                $calculation = $logistics->calculateQuote(
-                    (int)$request->origin_id,
-                    (int)$request->country_id,
-                    $request->region_id ? (int)$request->region_id : null,
-                    (float)$request->volume,
-                    'Standard' // Default service type
-                );
+        // Conversion Logic: Create Quote from any existing Leads for this email
+        $leads = Lead::where('email', $user->email)->where('status', 'new')->get();
+        
+        foreach ($leads as $lead) {
+            if ($lead->origin_id && $lead->country_id && $lead->volume_cft) {
+                try {
+                    $logistics = app(LogisticsService::class);
+                    $calculation = $logistics->calculateQuote(
+                        (int)$lead->origin_id,
+                        (int)$lead->country_id,
+                        $lead->region_id ? (int)$lead->region_id : null,
+                        (float)$lead->volume_cft,
+                        'Standard'
+                    );
 
-                if ($calculation['success']) {
-                    Quote::create([
-                        'user_id' => $user->id,
-                        'reference_number' => 'Q-' . date('y') . '-' . strtoupper(Str::random(6)),
-                        'origin_id' => $request->origin_id,
-                        'country_id' => $request->country_id,
-                        'region_id' => $request->region_id,
-                        'volume_cbm' => $logistics->cftToCbm($request->volume),
-                        'volume_cft' => $request->volume,
-                        'billable_volume_cft' => $calculation['billable_cft'],
-                        'rate_per_cft' => $calculation['rate_per_cft'],
-                        'total_price' => $calculation['total_price'],
-                        'service_type' => 'Standard',
-                        'status' => 'active'
-                    ]);
+                    if ($calculation['success']) {
+                        Quote::create([
+                            'user_id' => $user->id,
+                            'reference_number' => 'Q-' . date('y') . '-' . strtoupper(Str::random(6)),
+                            'origin_id' => $lead->origin_id,
+                            'country_id' => $lead->country_id,
+                            'region_id' => $lead->region_id,
+                            'volume_cbm' => $logistics->cftToCbm($lead->volume_cft),
+                            'volume_cft' => $lead->volume_cft,
+                            'billable_volume_cft' => $calculation['billable_cft'],
+                            'rate_per_cft' => $calculation['rate_per_cft'],
+                            'total_price' => $calculation['total_price'],
+                            'service_type' => 'Standard',
+                            'status' => 'active'
+                        ]);
 
-                    Lead::where('id', $request->lead_id)->update(['status' => 'converted']);
-                    
-                    return redirect()->route('quotes.index')->with('success', 'Welcome! We have automatically generated your requested quote.');
+                        $lead->update(['status' => 'converted']);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Conversion Error for Lead ID ' . $lead->id . ': ' . $e->getMessage());
                 }
-            } catch (\Exception $e) {
-                \Log::error('Conversion Error: ' . $e->getMessage());
             }
+        }
+
+        if ($leads->count() > 0) {
+            return redirect()->route('quotes.index')->with('success', 'Welcome! We have automatically generated quotes from your previous inquiries.');
         }
 
         return redirect(route('dashboard', absolute: false));

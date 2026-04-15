@@ -69,7 +69,7 @@
                             <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Service Logic</label>
                             <div class="grid grid-cols-2 gap-4">
                                 <label class="relative cursor-pointer">
-                                    <input type="radio" name="service_type" value="Warehouse to Door" @change="calculate()" class="peer sr-only" checked>
+                                    <input type="radio" name="service_type" value="Standard" @change="calculate()" class="peer sr-only" checked>
                                     <div class="p-4 border border-slate-200 rounded-2xl peer-checked:border-brand-500 peer-checked:bg-brand-50 transition-all text-center">
                                         <span class="block text-sm font-bold text-slate-900 uppercase tracking-widest">Standard Consolidation</span>
                                         <span class="text-[10px] text-slate-500">Warehouse to Door</span>

@@ -84,7 +84,7 @@
                             <!-- Origin -->
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Origin Warehouse</label>
-                                <select x-model="origin" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer">
+                                <select x-model="origin" required class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer">
                                     <option value="">Select Origin Point</option>
                                     @foreach($warehouses as $w)
                                         <option value="{{ $w->id }}">{{ $w->name }} ({{ $w->code }})</option>
@@ -95,7 +95,7 @@
                             <!-- Destination -->
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Destination Country</label>
-                                <select x-model="country_id" @change="updateRegions()" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer">
+                                <select x-model="country_id" required @change="updateRegions()" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm appearance-none cursor-pointer">
                                     <option value="">Select Destination</option>
                                     @foreach($countries as $c)
                                         <option value="{{ $c->id }}" data-regions="{{ $c->regions->toJson() }}">{{ $c->name }}</option>
@@ -126,43 +126,43 @@
                                 </div>
                             </div>
 
-                                    <div class="p-6 bg-brand-700/5 rounded-2xl border border-brand-700/10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                        <div>
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Billable Volume</p>
-                                            <p class="text-2xl font-bold text-slate-900 font-outfit"><span x-text="Math.max(cft || 0, 100)">100</span> <span class="text-sm font-normal text-slate-400">CFT</span></p>
-                                        </div>
-                                        <div class="text-left sm:text-right">
-                                            <span x-show="cft < 100 && cft > 0" class="text-[9px] font-bold text-brand-700 bg-brand-700/10 px-2 py-1 rounded-full uppercase tracking-tighter">Min 100 Applied</span>
-                                        </div>
-                                    </div>
+                            <div class="p-6 bg-brand-700/5 rounded-2xl border border-brand-700/10 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Billable Volume</p>
+                                    <p class="text-2xl font-bold text-slate-900 font-outfit"><span x-text="Math.max(cft || 0, 100)">100</span> <span class="text-sm font-normal text-slate-400">CFT</span></p>
+                                </div>
+                                <div class="text-left sm:text-right">
+                                    <span x-show="cft < 100 && cft > 0" class="text-[9px] font-bold text-brand-700 bg-brand-700/10 px-2 py-1 rounded-full uppercase tracking-tighter">Min 100 Applied</span>
+                                </div>
+                            </div>
 
-                                    <!-- Lead Data Capture -->
-                                    <input type="hidden" name="origin_id" x-model="origin">
-                                    <input type="hidden" name="country_id" x-model="country_id">
-                                    <input type="hidden" name="region_id" x-model="region_id">
-                                    <input type="hidden" name="volume" x-model="cft">
-                                    <input type="hidden" name="volume_unit" value="CFT">
+                            <!-- Lead Data Capture -->
+                            <input type="hidden" name="origin_id" x-model="origin">
+                            <input type="hidden" name="country_id" x-model="country_id">
+                            <input type="hidden" name="region_id" x-model="region_id">
+                            <input type="hidden" name="volume" x-model="cft">
+                            <input type="hidden" name="volume_unit" value="CFT">
 
-                                    <div class="space-y-2 mb-6">
-                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Business Email</label>
-                                        <input type="email" name="email" required placeholder="name@company.com" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm">
-                                    </div>
-                                    
-                                    <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-700/20 no-underline uppercase tracking-widest text-sm outline-none border-none cursor-pointer mb-4">
-                                        Submit Quote Inquiry
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                    </button>
+                            <div class="space-y-2 mb-6">
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Business Email</label>
+                                <input type="email" name="email" required placeholder="name@company.com" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm">
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-700/20 no-underline uppercase tracking-widest text-sm outline-none border-none cursor-pointer mb-4">
+                                Submit Quote Inquiry
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            </button>
 
-                                    @auth
-                                        <a href="{{ route('quotes.create') }}" class="block text-center text-[10px] font-bold text-brand-700 uppercase tracking-widest hover:text-brand-800 transition-colors">
-                                            Or Continue to portal for real-time rates →
-                                        </a>
-                                    @else
-                                        <a href="{{ route('register') }}" class="block text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-brand-700 transition-colors">
-                                            Registration for instant portal access →
-                                        </a>
-                                    @endauth
-                                </form>
+                            @auth
+                                <a href="{{ route('quotes.create') }}" class="block text-center text-[10px] font-bold text-brand-700 uppercase tracking-widest hover:text-brand-800 transition-colors">
+                                    Or Continue to portal for real-time rates →
+                                </a>
+                            @else
+                                <a href="{{ route('register') }}" class="block text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-brand-700 transition-colors">
+                                    Registration for instant portal access →
+                                </a>
+                            @endauth
+                        </form>
                                 <p class="text-[10px] text-center text-slate-400 uppercase tracking-[0.2em] mt-6 font-bold">
                                     Accurate LCL rates require portal access
                                 </p>

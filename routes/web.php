@@ -24,6 +24,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/{user}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
     Route::post('/users/{user}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
     
+    Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
+    
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     

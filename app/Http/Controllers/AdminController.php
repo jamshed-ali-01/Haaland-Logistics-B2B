@@ -27,6 +27,12 @@ class AdminController extends Controller
         return view('admin.users', compact('users'));
     }
 
+    public function leads()
+    {
+        $leads = \App\Models\Lead::with(['origin', 'country', 'region'])->orderBy('created_at', 'desc')->paginate(20);
+        return view('admin.leads', compact('leads'));
+    }
+
     public function settings()
     {
         $settings = \App\Models\SystemSetting::all()->keyBy('key');

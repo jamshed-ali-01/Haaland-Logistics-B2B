@@ -38,21 +38,21 @@
                         @forelse($quotes as $quote)
                             <tr class="hover:bg-white/[0.02] transition-colors group">
                                 <td class="px-6 py-4">
-                                    <span class="text-sm font-bold text-white uppercase">Q-{{ str_pad($quote->id, 5, '0', STR_PAD_LEFT) }}</span>
-                                    <p class="text-[10px] text-slate-500 uppercase">{{ $quote->created_at->format('M d, Y') }}</p>
+                                    <span class="text-sm font-bold text-slate-900 uppercase">{{ $quote->reference_number }}</span>
+                                    <p class="text-[10px] text-slate-500 uppercase font-medium">{{ $quote->created_at->format('M d, Y') }}</p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-brand-400">{{ $quote->origin->code }}</span>
-                                        <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                        <span class="text-xs font-bold text-white">{{ $quote->country->name }}</span>
+                                        <span class="text-xs font-bold text-brand-700">{{ $quote->origin->code }}</span>
+                                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        <span class="text-xs font-bold text-slate-900">{{ $quote->country->name }}</span>
                                     </div>
-                                    <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-tighter">{{ $quote->service_type }} Service</p>
+                                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">{{ $quote->service_type }} Service</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm font-medium text-slate-300">{{ number_format($quote->billable_volume_cft, 2) }} CFT</span>
+                                    <span class="text-sm font-bold text-slate-700">{{ number_format($quote->billable_volume_cft, 2) }} CFT</span>
                                     @if($quote->volume_cft < 100)
-                                        <span class="ml-1 text-[9px] text-brand-500/80 font-bold uppercase">(Min Applied)</span>
+                                        <p class="text-[9px] text-brand-600 font-bold uppercase tracking-tighter mt-1">(Min Volume Applied)</p>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">

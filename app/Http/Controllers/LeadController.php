@@ -85,14 +85,6 @@ class LeadController extends Controller
             }
         }
 
-        return redirect()->route('register', [
-            'email' => $request->email,
-            'lead_id' => $lead->id,
-            'origin_id' => $request->origin_id,
-            'country_id' => $request->country_id,
-            'region_id' => $request->region_id,
-            'volume' => $volumeCft,
-            'volume_unit' => 'CFT'
-        ])->with('success', 'Inquiry received! Complete your registration below to view your full quote.');
+        return redirect()->back()->with('success', 'Thank you! Your inquiry has been received. Our team will contact you shortly, or you can register now to view your formal quote.');
     }
 }
