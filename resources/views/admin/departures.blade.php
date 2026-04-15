@@ -65,12 +65,15 @@
                                 <td class="px-6 py-5">
                                     <div class="flex flex-col gap-1.5">
                                         <div class="flex justify-between text-[9px] uppercase font-bold">
-                                            <span class="text-slate-500">Bookings: {{ $dep->bookings_count }}</span>
-                                            <span class="text-brand-700">Capacity: {{ $dep->capacity_cft }} CFT</span>
+                                            <span class="text-slate-500">Utilization: {{ $dep->utilization_percentage }}%</span>
+                                            <span class="text-brand-700">Capacity: {{ number_format($dep->capacity_cft) }} CFT</span>
                                         </div>
                                         <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
-                                            <div class="bg-brand-700 h-full w-[45%]"></div>
+                                            <div class="bg-brand-700 h-full transition-all duration-500" :style="`width: {{ $dep->utilization_percentage }}%`" :class="{'bg-red-500': {{ $dep->utilization_percentage }} > 90, 'bg-amber-500': {{ $dep->utilization_percentage }} > 75 && {{ $dep->utilization_percentage }} <= 90}"></div>
                                         </div>
+                                        @if($dep->utilization_percentage > 90)
+                                            <span class="text-[8px] text-red-500 font-bold uppercase tracking-tighter">Critical: Near Capacity</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-8 py-5 text-right">

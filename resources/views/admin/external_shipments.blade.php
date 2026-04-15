@@ -3,13 +3,13 @@
         {{ __('External Shipments (Manual Entry)') }}
     </x-slot>
 
-    <div class="grid lg:grid-cols-3 gap-8">
+    <div class="grid lg:grid-cols-3 gap-8 animate-fade-in-up">
         <!-- Manual Entry Form -->
         <div class="lg:col-span-1">
-            <div class="premium-card">
-                <h3 class="text-xl font-bold text-white mb-6 font-outfit">Log External Shipment</h3>
+            <div class="premium-card bg-gradient-to-br from-slate-900 to-brand-950 border-none shadow-2xl">
+                <h3 class="text-xl font-bold text-white mb-6 font-outfit uppercase tracking-tight italic">Log External Shipment</h3>
                 
-                <form action="{{ route('admin.external-shipments.store') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.external-shipments.store') }}" method="POST" class="space-y-5">
                     @csrf
                     
                     <div>

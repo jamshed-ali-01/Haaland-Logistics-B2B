@@ -21,4 +21,18 @@ class Departure extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function getUtilizationPercentageAttribute()
+    {
+        if ($this->capacity_cft <= 0) return 0;
+
+        $bookedVolume = $this->bookings->sum(function($booking) {
+            if ($booking->quote_id) {
+                return $booking->quote->billable_volume_cft;
+            }
+            return $booking->external_volume_cft ?? 0;
+        });
+
+        return round(($bookedVolume / $this->capacity_cft) * 100, 1);
+    }
 }

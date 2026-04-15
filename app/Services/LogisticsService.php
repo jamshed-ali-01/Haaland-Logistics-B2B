@@ -43,17 +43,25 @@ class LogisticsService
         $billableCft = max($cft, $minVol);
 
         // Fetch Base Rate Entry
-        $query = Rate::where('origin_id', $originId)
+        // Step 1: Search for specific Region + Country + Origin
+        $rate = Rate::where('origin_id', $originId)
             ->where('country_id', $countryId)
-            ->where('service_type', $serviceType);
+            ->where('service_type', $serviceType)
+            ->when($regionId, function($q) use ($regionId) {
+                return $q->where('region_id', $regionId);
+            }, function($q) {
+                return $q->whereNull('region_id');
+            })
+            ->first();
 
-        if ($regionId) {
-            $query->where('region_id', $regionId);
-        } else {
-            $query->whereNull('region_id');
+        // Step 2: Fallback to Country + Origin (Region NULL) if Step 1 failed
+        if (!$rate && $regionId) {
+            $rate = Rate::where('origin_id', $originId)
+                ->where('country_id', $countryId)
+                ->where('service_type', $serviceType)
+                ->whereNull('region_id')
+                ->first();
         }
-
-        $rate = $query->first();
 
         if (!$rate) {
             return ['success' => false, 'message' => 'Rate not found for selected criteria.'];

@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quote;
+use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\Country;
 use App\Services\LogisticsService;
+use App\Mail\QuoteSummary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class QuoteController extends Controller
 {
@@ -32,13 +36,47 @@ class QuoteController extends Controller
     {
         // Only approved users can create formal quotes
         if (Auth::user()->status !== 'approved') {
-            return redirect()->route('dashboard')->with('error', 'Your account must be approved to request quotes.');
+            return redirect()->route('dashboard')->with('error', 'Your account verification is in progress. Please wait for admin approval to request formal quotes.');
         }
 
         $warehouses = Warehouse::all();
         $countries = Country::with('regions')->get();
+        
+        $prefill = [
+            'origin_id' => request('origin_id'),
+            'country_id' => request('country_id'),
+            'region_id' => request('region_id'),
+            'volume' => request('volume'),
+            'volume_unit' => request('volume_unit'),
+        ];
 
-        return view('quotes.create', compact('warehouses', 'countries'));
+        return view('quotes.create', compact('warehouses', 'countries', 'prefill'));
+    }
+
+    public function calculate(Request $request)
+    {
+        $request->validate([
+            'origin_id' => 'required|exists:warehouses,id',
+            'country_id' => 'required|exists:countries,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'volume' => 'required|numeric|min:0.01',
+            'volume_unit' => 'required|in:CBM,CFT',
+            'service_type' => 'required|string',
+        ]);
+
+        $cft = $request->volume_unit === 'CBM' 
+            ? $this->logistics->cbmToCft($request->volume) 
+            : $request->volume;
+
+        $calculation = $this->logistics->calculateQuote(
+            (int)$request->origin_id,
+            (int)$request->country_id,
+            $request->region_id ? (int)$request->region_id : null,
+            (float)$cft,
+            $request->service_type
+        );
+
+        return response()->json($calculation);
     }
 
     public function store(Request $request)
@@ -65,14 +103,19 @@ class QuoteController extends Controller
         );
 
         if (!$calculation['success']) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $calculation['message']], 422);
+            }
             return back()->withInput()->with('error', $calculation['message']);
         }
 
-        Quote::create([
+        $quote = Quote::create([
             'user_id' => Auth::id(),
+            'reference_number' => 'Q-' . date('y') . '-' . strtoupper(Str::random(6)),
             'origin_id' => $request->origin_id,
             'country_id' => $request->country_id,
             'region_id' => $request->region_id,
+            'volume_cbm' => $this->logistics->cftToCbm($cft),
             'volume_cft' => $cft,
             'billable_volume_cft' => $calculation['billable_cft'],
             'rate_per_cft' => $calculation['rate_per_cft'],
@@ -81,6 +124,17 @@ class QuoteController extends Controller
             'status' => 'active'
         ]);
 
+        // Send Quote Email
+        try {
+            Mail::to(Auth::user()->email)->send(new QuoteSummary($quote));
+        } catch (\Exception $e) {
+            \Log::error('Mail Error: ' . $e->getMessage());
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Quote generated successfully.', 'redirect' => route('quotes.index')]);
+        }
+        
         return redirect()->route('quotes.index')->with('success', 'Quote generated successfully.');
     }
 }

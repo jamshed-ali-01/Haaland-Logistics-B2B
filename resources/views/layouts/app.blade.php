@@ -14,9 +14,32 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- jQuery & DataTables (Professional Theme) -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <link href="https://cdn.datatables.net/2.0.3/css/dataTables.tailwindcss.css" rel="stylesheet">
+        <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.0.3/js/dataTables.tailwindcss.js"></script>
     </head>
     <body x-data="{ sidebarOpen: false }" 
           class="font-sans antialiased text-slate-900 bg-slate-50 h-full overflow-hidden transition-colors duration-300">
+        <x-toast />
         @include('layouts.sidebar')
+
+        <!-- Auto Init DataTables -->
+        <script>
+            $(document).ready(function() {
+                if ($('.datatable').length > 0) {
+                    $('.datatable').DataTable({
+                        responsive: true,
+                        pageLength: 25,
+                        language: {
+                            search: "<span class='text-xs font-bold text-brand-700 uppercase tracking-widest'>Search Database:</span>",
+                            lengthMenu: "<span class='text-xs font-bold text-slate-500 uppercase tracking-widest'>Show _MENU_ entries</span>"
+                        }
+                    });
+                }
+            });
+        </script>
     </body>
 </html>

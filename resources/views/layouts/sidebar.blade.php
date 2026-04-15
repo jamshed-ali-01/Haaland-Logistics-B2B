@@ -13,6 +13,16 @@
 
         <!-- Navigation Links -->
         <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto custom-scrollbar">
+            @if(Auth::user()->role === 'client' && Auth::user()->status === 'pending')
+                <div class="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                    <div class="flex items-center gap-3 text-amber-500 mb-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <p class="text-[10px] font-bold uppercase tracking-widest leading-none">Wait for Approval</p>
+                    </div>
+                    <p class="text-[9px] text-slate-400 font-medium leading-relaxed font-outfit">Your account is being verified. Formal quotes and bookings are restricted until approval.</p>
+                </div>
+            @endif
+
             <!-- Global Dashboard -->
             <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6">
                 {{ __('Overview') }}
@@ -47,14 +57,23 @@
                 <x-sidebar-link :href="route('admin.external-shipments')" :active="request()->routeIs('admin.external-shipments')" icon="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
                     {{ __('Ops Tool') }}
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.settings')" :active="request()->routeIs('admin.settings')" icon="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                    {{ __('Global Settings') }}
+                </x-sidebar-link>
             @else
                 <div class="pt-6 pb-2 px-4">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Shipments</p>
                 </div>
-                <x-sidebar-link :href="route('quotes.index')" :active="request()->routeIs('quotes.index')" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z">
+                <x-sidebar-link :href="Auth::user()->status === 'approved' ? route('quotes.index') : '#'" 
+                                :active="request()->routeIs('quotes.index')" 
+                                icon="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"
+                                :disabled="Auth::user()->status !== 'approved'">
                     {{ __('Quotes') }}
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('bookings.index')" :active="request()->routeIs('bookings.index')" icon="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2m16 0l-8 4-8-4">
+                <x-sidebar-link :href="Auth::user()->status === 'approved' ? route('bookings.index') : '#'" 
+                                :active="request()->routeIs('bookings.index')" 
+                                icon="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2m16 0l-8 4-8-4"
+                                :disabled="Auth::user()->status !== 'approved'">
                     {{ __('Bookings') }}
                 </x-sidebar-link>
             @endif

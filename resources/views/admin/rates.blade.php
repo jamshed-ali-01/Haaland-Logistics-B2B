@@ -3,7 +3,15 @@
         {{ __('Rate Management') }}
     </x-slot>
 
-    <div class="space-y-6" x-data="{ editingRate: { origin_id: '', country_id: '', service: '', service_type: '', tier_prices: {} } }">
+    <div class="space-y-6" x-data="{ 
+        editingRate: { id: '', origin_id: '', country_id: '', region_id: '', shipping_service_id: '', service_type_id: '', tier_prices: {} },
+        newRate: { country_id: '' },
+        countries: {{ $countries->toJson() }},
+        getRegions(countryId) {
+            const country = this.countries.find(c => c.id == countryId);
+            return country ? country.regions : [];
+        }
+    }">
         <!-- Actions Row -->
         <div class="flex justify-between items-center animate-fade-in-up">
             <div class="bg-white px-6 py-4 rounded-2xl border border-slate-200 flex items-center gap-4">
@@ -151,11 +159,20 @@
                         </div>
                         <div>
                             <x-input-label for="country_id" value="Destination Country" />
-                            <select name="country_id" class="input-premium w-full mt-1" required>
+                            <select name="country_id" class="input-premium w-full mt-1" required x-model="newRate.country_id">
                                 <option value="">Select Country</option>
                                 @foreach($countries as $country)
                                     <option value="{{ $country->id }}">{{ $country->name }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="region_id" value="Region (Optional)" />
+                            <select name="region_id" class="input-premium w-full mt-1">
+                                <option value="">Entire Country / Main Hub</option>
+                                <template x-for="region in getRegions(newRate.country_id)" :key="region.id">
+                                    <option :value="region.id" x-text="region.name"></option>
+                                </template>
                             </select>
                         </div>
                     </div>
@@ -239,6 +256,15 @@
                             @foreach($countries as $country)
                                 <option value="{{ $country->id }}">{{ $country->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label for="edit_region_id" value="Region (Optional)" />
+                        <select name="region_id" id="edit_region_id" class="input-premium w-full mt-1" x-model="editingRate.region_id">
+                            <option value="">Entire Country / Main Hub</option>
+                            <template x-for="region in getRegions(editingRate.country_id)" :key="region.id">
+                                <option :value="region.id" x-text="region.name" :selected="region.id == editingRate.region_id"></option>
+                            </template>
                         </select>
                     </div>
                 </div>

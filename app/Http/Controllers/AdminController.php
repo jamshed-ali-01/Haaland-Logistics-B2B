@@ -27,6 +27,32 @@ class AdminController extends Controller
         return view('admin.users', compact('users'));
     }
 
+    public function settings()
+    {
+        $settings = \App\Models\SystemSetting::all()->keyBy('key');
+        return view('admin.settings', compact('settings'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'origin_service_fee' => 'required|numeric|min:0',
+            'minimum_volume' => 'required|numeric|min:0',
+        ]);
+
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => 'origin_service_fee'],
+            ['value' => $request->origin_service_fee, 'type' => 'decimal']
+        );
+        
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => 'minimum_volume'],
+            ['value' => $request->minimum_volume, 'type' => 'decimal']
+        );
+
+        return back()->with('success', 'System settings updated successfully.');
+    }
+
     public function rates()
     {
         $rates = Rate::with(['origin', 'country', 'region', 'tiers', 'shippingService', 'serviceType'])
@@ -34,7 +60,7 @@ class AdminController extends Controller
             ->paginate(15);
             
         $warehouses = Warehouse::all();
-        $countries = Country::all();
+        $countries = Country::with('regions')->get();
         $regions = Region::all();
         $shippingServices = ShippingService::all();
         $serviceTypes = ServiceType::all();
@@ -257,7 +283,15 @@ class AdminController extends Controller
             'departure_id' => $request->departure_id,
         ]);
 
-        return back()->with('success', 'External shipment recorded successfully.');
+        return back()->with('success', 'External shipment logged successfully.');
+    }
+
+    public function toggleBookingStatus(Booking $booking)
+    {
+        $newStatus = $booking->status === 'pending' ? 'scheduled' : 'pending';
+        $booking->update(['status' => $newStatus]);
+        
+        return back()->with('success', 'Booking status updated to ' . $newStatus);
     }
 
     public function approveUser(User $user)
@@ -355,16 +389,21 @@ class AdminController extends Controller
                 // Operational
                 'active_departures' => Departure::where('departure_date', '>', now())->count(),
                 'total_voyages' => Departure::count(),
+                'special_requests_count' => Booking::where('is_special_request', true)->count(),
+                
+                'total_leads' => \App\Models\Lead::count(),
+                'new_leads_count' => \App\Models\Lead::where('status', 'new')->count(),
                 
                 'total_quotes' => $totalQuotes = Quote::count(),
                 'total_bookings' => $totalBookings = Booking::count(),
                 'success_rate' => $totalQuotes > 0 ? number_format(($totalBookings / $totalQuotes) * 100, 1) : 0,
-                'estimated_revenue' => Booking::join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
-                'total_volume_cft' => Booking::join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
+                'estimated_revenue' => Booking::whereNotNull('quote_id')->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
+                'total_volume_cft' => Booking::whereNotNull('quote_id')->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft') + Booking::whereNull('quote_id')->sum('external_volume_cft'),
                 
                 // Recent Activity
                 'recent_quotes' => Quote::with(['user', 'country'])->latest()->take(5)->get(),
                 'recent_bookings' => Booking::with(['user', 'quote.country'])->latest()->take(5)->get(),
+                'recent_leads' => \App\Models\Lead::latest()->take(5)->get(),
                 'upcoming_departures' => Departure::where('departure_date', '>', now())->orderBy('departure_date', 'asc')->take(3)->get(),
             ];
             
@@ -374,10 +413,11 @@ class AdminController extends Controller
             $stats = [
                 'my_quotes_count' => Quote::where('user_id', $user->id)->count(),
                 'my_bookings_count' => Booking::where('user_id', $user->id)->count(),
-                'my_total_spending' => Booking::where('user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
-                'my_volume_cft' => Booking::where('user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
+                'my_total_spending' => Booking::where('bookings.user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.total_price'),
+                'my_volume_cft' => Booking::where('bookings.user_id', $user->id)->join('quotes', 'bookings.quote_id', '=', 'quotes.id')->sum('quotes.volume_cft'),
                 'recent_my_quotes' => Quote::where('user_id', $user->id)->latest()->take(5)->get(),
                 'recent_my_bookings' => Booking::where('user_id', $user->id)->with('quote.country')->latest()->take(5)->get(),
+                'upcoming_departures' => Departure::where('departure_date', '>', now())->orderBy('departure_date', 'asc')->take(3)->get(),
             ];
 
             return view('dashboard', compact('stats'));

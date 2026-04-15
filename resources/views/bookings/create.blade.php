@@ -8,14 +8,25 @@
             <h3 class="text-xl font-bold text-white mb-2 font-outfit">Booking Confirmation</h3>
             <p class="text-xs text-slate-500 mb-6 uppercase tracking-widest">Quote Reference: Q-{{ str_pad($quote->id, 5, '0', STR_PAD_LEFT) }}</p>
 
-            <form action="{{ route('bookings.store', $quote) }}" method="POST" class="space-y-6">
+            <form action="{{ route('bookings.store', $quote) }}" method="POST" class="space-y-6" x-data="bookingScheduler()">
                 @csrf
                 
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Warehouse Drop-off Date</label>
-                    <input type="date" name="drop_off_date" required 
-                           class="input-premium w-full" 
-                           min="{{ date('Y-m-d') }}">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Drop-off Date</label>
+                        <input type="date" name="drop_off_date" required 
+                               x-model="date"
+                               @change="validate()"
+                               class="input-premium w-full" 
+                               min="{{ date('Y-m-d') }}">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Time</label>
+                        <input type="time" name="drop_off_time" required 
+                               x-model="time"
+                               @change="validate()"
+                               class="input-premium w-full">
+                    </div>
                 </div>
 
                 <div class="p-4 bg-brand-500/5 rounded-xl border border-white/5 space-y-2">
@@ -28,8 +39,11 @@
                 </div>
 
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" name="special_request" class="w-5 h-5 rounded border-white/10 bg-white/5 text-brand-600 focus:ring-brand-500">
-                    <span class="text-xs text-slate-300 group-hover:text-white transition-colors">This is a special request / off-hours delivery</span>
+                    <input type="checkbox" name="special_request" x-model="specialRequest" class="w-5 h-5 rounded border-white/10 bg-white/5 text-brand-600 focus:ring-brand-500">
+                    <span class="text-xs text-slate-300 group-hover:text-white transition-colors">
+                        This is a special request / off-hours delivery
+                        <span x-show="autoFlagged" class="text-brand-400 font-bold ml-2">(Auto-flagged)</span>
+                    </span>
                 </label>
 
                 <div class="pt-4">
@@ -42,4 +56,32 @@
             </form>
         </div>
     </div>
+    <script>
+        function bookingScheduler() {
+            return {
+                date: '',
+                time: '09:00',
+                specialRequest: false,
+                autoFlagged: false,
+
+                validate() {
+                    if (!this.date || !this.time) return;
+
+                    const selectedDate = new Date(this.date);
+                    const day = selectedDate.getDay(); // 0 is Sunday, 6 is Saturday
+                    const hour = parseInt(this.time.split(':')[0]);
+
+                    const isWeekend = (day === 0 || day === 6);
+                    const isOutsideHours = (hour < 9 || hour >= 18);
+
+                    if (isWeekend || isOutsideHours) {
+                        this.specialRequest = true;
+                        this.autoFlagged = true;
+                    } else {
+                        this.autoFlagged = false;
+                    }
+                }
+            }
+        }
+    </script>
 </x-app-layout>
