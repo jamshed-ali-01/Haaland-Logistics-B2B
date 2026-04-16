@@ -68,8 +68,8 @@ class LeadController extends Controller
                         'origin_id' => $request->origin_id,
                         'country_id' => $request->country_id,
                         'region_id' => $request->region_id,
-                        'volume_cbm' => $logistics->cftToCbm($volumeCft),
-                        'volume_cft' => $volumeCft,
+                        'volume_cbm' => $logistics->cftToCbm((float)$volumeCft),
+                        'volume_cft' => (float)$volumeCft,
                         'billable_volume_cft' => $calculation['billable_cft'],
                         'rate_per_cft' => $calculation['rate_per_cft'],
                         'total_price' => $calculation['total_price'],
@@ -78,11 +78,28 @@ class LeadController extends Controller
                     ]);
 
                     $lead->update(['status' => 'converted']);
+                    
+                    if ($request->expectsJson()) {
+                        session()->flash('success', 'Your inquiry has been converted to a formal quote.');
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Your inquiry has been converted to a formal quote.',
+                            'redirect' => route('quotes.index')
+                        ]);
+                    }
+
                     return redirect()->route('quotes.index')->with('success', 'Your inquiry has been converted to a formal quote.');
                 }
             } catch (\Exception $e) {
                 \Log::error('Auth Lead Conversion Error: ' . $e->getMessage());
             }
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Thank you! Your inquiry has been received. Our team will contact you shortly, or you can register now to view your formal quote.'
+            ]);
         }
 
         return redirect()->back()->with('success', 'Thank you! Your inquiry has been received. Our team will contact you shortly, or you can register now to view your formal quote.');

@@ -7,10 +7,27 @@
             const id = Date.now()
             this.messages.push({ id, message, type })
             setTimeout(() => this.remove(id), 5000)
+        },
+        init() {
+            @if(session('success')) 
+                this.add({{ Js::from(session('success')) }}, 'success')
+            @endif
+            @if(session('error')) 
+                this.add({{ Js::from(session('error')) }}, 'error')
+            @endif
+            @if(session('status')) 
+                this.add({{ Js::from(session('status')) }}, 'info')
+            @endif
+            @if($errors->any())
+                @foreach($errors->all() as $error)
+                    this.add({{ Js::from($error) }}, 'error')
+                @endforeach
+            @endif
         }
     }"
     @toast.window="add($event.detail.message, $event.detail.type)"
-    class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-sm">
+    class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-sm"
+    x-cloak>
     
     <template x-for="m in messages" :key="m.id">
         <div x-show="true"
@@ -43,17 +60,4 @@
             </button>
         </div>
     </template>
-
-    {{-- Initial Flash Messages Hook --}}
-    <div x-init="
-        @if(session('success')) 
-            $nextTick(() => add('{{ session('success') }}', 'success'))
-        @endif
-        @if(session('error')) 
-            $nextTick(() => add('{{ session('error') }}', 'error'))
-        @endif
-        @if(session('status')) 
-            $nextTick(() => add('{{ session('status') }}', 'info'))
-        @endif
-    "></div>
 </div>

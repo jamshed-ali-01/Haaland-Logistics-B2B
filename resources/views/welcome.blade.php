@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Haaland Logistics | Premium B2B Shipping</title>
         
         <!-- Fonts -->
@@ -79,7 +80,7 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('leads.store') }}" method="POST" class="space-y-6">
+                        <form @submit.prevent="submitQuote()" class="space-y-6">
                             @csrf
                             <!-- Origin -->
                             <div class="space-y-2">
@@ -145,12 +146,23 @@
 
                             <div class="space-y-2 mb-6">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Your Business Email</label>
-                                <input type="email" name="email" required placeholder="name@company.com" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm">
+                                <input type="email" x-model="email" required placeholder="name@company.com" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-slate-900 focus:border-brand-700 focus:ring-0 outline-none transition-all font-bold text-sm">
                             </div>
                             
-                            <button type="submit" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-700/20 no-underline uppercase tracking-widest text-sm outline-none border-none cursor-pointer mb-4">
-                                Submit Quote Inquiry
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                             <button type="submit" 
+                                     :disabled="loading"
+                                     class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-brand-700/20 no-underline uppercase tracking-widest text-sm outline-none border-none cursor-pointer mb-4 disabled:opacity-70 disabled:cursor-not-allowed">
+                                <span x-show="!loading" class="flex items-center gap-3">
+                                    Submit Quote Inquiry
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                </span>
+                                <span x-show="loading" class="flex items-center gap-3">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </span>
                             </button>
 
                             @auth
@@ -202,6 +214,8 @@
                     regions: [],
                     cbm: null,
                     cft: null,
+                    email: '',
+                    loading: false,
                     
                     updateRegions() {
                         const select = event.target;
@@ -227,6 +241,60 @@
                             this.cbm = (this.cft / 35.3147).toFixed(2);
                         } else {
                             this.cbm = null;
+                        }
+                    },
+
+                    async submitQuote() {
+                        if (this.loading) return;
+                        this.loading = true;
+
+                        try {
+                            const response = await axios.post('{{ route('leads.store') }}', {
+                                email: this.email,
+                                origin_id: this.origin,
+                                country_id: this.country_id,
+                                region_id: this.region_id,
+                                volume: this.cft,
+                                volume_unit: 'CFT'
+                            }, {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            });
+
+                            if (response.data.success) {
+                                window.dispatchEvent(new CustomEvent('toast', {
+                                    detail: { message: response.data.message, type: 'success' }
+                                }));
+                                
+                                // Reset Form
+                                this.email = '';
+                                this.cbm = null;
+                                this.cft = null;
+                                this.origin = '';
+                                this.country_id = '';
+                                this.region_id = '';
+                                this.regions = [];
+
+                                if (response.data.redirect) {
+                                    setTimeout(() => window.location.href = response.data.redirect, 1500);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Submission error:', error);
+                            let message = 'Something went wrong. Please try again.';
+                            
+                            if (error.response && error.response.data && error.response.data.errors) {
+                                message = Object.values(error.response.data.errors).flat()[0];
+                            } else if (error.response && error.response.data && error.response.data.message) {
+                                message = error.response.data.message;
+                            }
+
+                            window.dispatchEvent(new CustomEvent('toast', {
+                                detail: { message: message, type: 'error' }
+                            }));
+                        } finally {
+                            this.loading = false;
                         }
                     }
                 }
