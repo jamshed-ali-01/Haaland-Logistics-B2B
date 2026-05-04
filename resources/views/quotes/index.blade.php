@@ -3,7 +3,7 @@
         {{ __('Quote History') }}
     </x-slot>
 
-    <div class="space-y-6">
+    <div class="space-y-6" x-data="{ showBookModal: false, bookUrl: '', quoteRef: '' }">
         <!-- Header Section -->
         <div class="flex justify-between items-center animate-fade-in-up">
             <h3 class="text-xl font-bold text-slate-900 font-outfit">Your Shipments</h3>
@@ -61,6 +61,8 @@
                                 <td class="px-6 py-4">
                                     @if($quote->status === 'active')
                                         <span class="px-2 py-1 rounded bg-brand-500/10 text-brand-500 text-[10px] font-bold uppercase border border-brand-500/20">Valid</span>
+                                    @elseif($quote->status === 'requested')
+                                        <span class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase border border-amber-500/20">Booking Requested</span>
                                     @elseif($quote->status === 'booked')
                                         <span class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase border border-emerald-500/20">Booked</span>
                                     @else
@@ -69,9 +71,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     @if($quote->status === 'active')
-                                        <a href="{{ route('bookings.create', $quote) }}" class="btn-primary no-underline inline-block text-[10px] font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-lg shadow-brand-600/20">
-                                            Book Now
-                                        </a>
+                                        <button 
+                                            @click.stop="bookUrl = '{{ route('bookings.store', $quote) }}'; quoteRef = '{{ $quote->reference_number }}'; showBookModal = true"
+                                            class="btn-primary no-underline inline-block text-[10px] font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-lg shadow-brand-600/20">
+                                            Request Booking
+                                        </button>
                                     @else
                                         <button class="bg-white/5 text-slate-500 text-[10px] font-bold uppercase px-3 py-2 rounded-lg cursor-not-allowed">
                                             {{ ucfirst($quote->status) }}
@@ -102,6 +106,39 @@
                     {{ $quotes->links() }}
                 </div>
             @endif
+        </div>
+
+        <!-- Booking Confirmation Modal -->
+        <div x-show="showBookModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+            <div @click.away="showBookModal = false" class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-8 animate-fade-in">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight">Request Booking</h2>
+                    <button type="button" @click="showBookModal = false" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="p-4 bg-brand-50 rounded-2xl border border-brand-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Quote Reference</p>
+                        <p class="text-lg font-bold text-brand-700" x-text="quoteRef"></p>
+                    </div>
+
+                    <p class="text-sm text-slate-500 leading-relaxed">
+                        Are you sure you want to request a booking for this quote? Once requested, our team will review the details and assign a vessel schedule for you.
+                    </p>
+
+                    <form :action="bookUrl" method="POST" class="flex justify-end gap-3 pt-6 border-t border-slate-50">
+                        @csrf
+                        <button type="button" @click="showBookModal = false" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-500 border border-slate-200 hover:bg-slate-50 transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white bg-brand-700 hover:bg-brand-600 shadow-xl shadow-brand-700/20 transition-all">
+                            Confirm & Book
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

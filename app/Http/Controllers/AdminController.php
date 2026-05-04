@@ -75,13 +75,16 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('admin.quotes', compact('quotes'));
+        $departures = \App\Models\Departure::whereIn('status', ['open', 'active'])->get();
+
+        return view('admin.quotes', compact('quotes', 'departures'));
     }
 
     public function showQuote(Quote $quote)
     {
         $quote->load(['user', 'origin', 'country', 'region', 'destination', 'booking']);
-        return view('admin.quote_details', compact('quote'));
+        $departures = \App\Models\Departure::whereIn('status', ['open', 'active'])->get();
+        return view('admin.quote_details', compact('quote', 'departures'));
     }
 
     public function updateQuoteNotes(Request $request, Quote $quote)
@@ -100,9 +103,10 @@ class AdminController extends Controller
         $booking = \App\Models\Booking::create([
             'quote_id' => $quote->id,
             'user_id' => $quote->user_id,
-            'booking_number' => 'HL-' . strtoupper(\Illuminate\Support\Str::random(8)),
+            'booking_number' => 'HL-' . strtoupper(Str::random(8)),
             'status' => 'pending',
             'destination_warehouse_id' => $quote->destination_warehouse_id,
+            'departure_id' => request('departure_id'),
         ]);
 
         $quote->update(['status' => 'booked']);

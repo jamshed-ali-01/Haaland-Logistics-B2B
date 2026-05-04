@@ -12,18 +12,54 @@
             </a>
             <div class="flex items-center gap-3">
                 @if($quote->status === 'active')
-                    <form action="{{ route('admin.quotes.accept', $quote) }}" method="POST">
-                        @csrf
-                        <x-primary-button class="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20">
-                            {{ __('Accept & Create Booking') }}
-                        </x-primary-button>
-                    </form>
+                    <!-- Accept Button -->
+                    <x-primary-button type="button" x-on:click.prevent="$dispatch('open-modal', 'confirm-booking')" class="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 whitespace-nowrap">
+                        {{ __('Accept & Book') }}
+                    </x-primary-button>
+
+                    <!-- Reject Button -->
                     <form action="{{ route('admin.quotes.reject', $quote) }}" method="POST">
                         @csrf
                         <button class="px-6 py-2.5 rounded-xl font-semibold text-red-600 border border-red-200 hover:bg-red-50 transition-all">
-                            {{ __('Reject Inquiry') }}
+                            {{ __('Reject') }}
                         </button>
                     </form>
+
+                    <!-- Standard Website Modal -->
+                    <x-modal name="confirm-booking" focusable>
+                        <form action="{{ route('admin.quotes.accept', $quote) }}" method="POST" class="p-8">
+                            @csrf
+                            <div class="flex justify-between items-center mb-8">
+                                <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight">Finalize Booking</h2>
+                                <button type="button" x-on:click="$dispatch('close')" class="text-slate-400 hover:text-slate-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">Select Vessel / Container</label>
+                                    <select name="departure_id" required class="w-full rounded-2xl border-slate-200 py-3 text-sm focus:ring-brand-500 shadow-sm font-semibold text-slate-600">
+                                        <option value="">-- Choose Container --</option>
+                                        @foreach($departures as $departure)
+                                            <option value="{{ $departure->id }}">
+                                                {{ $departure->vessel_name }} (Voyage: #{{ $departure->voyage_number }} | Dep: {{ $departure->departure_date->format('M d') }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="flex justify-end gap-3 pt-6 border-t border-slate-50">
+                                    <button type="button" x-on:click="$dispatch('close')" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-500 border border-slate-200 hover:bg-slate-50 transition-all">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all">
+                                        Confirm Booking
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </x-modal>
                 @elseif($quote->status === 'booked')
                     <div class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl border border-emerald-100 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
