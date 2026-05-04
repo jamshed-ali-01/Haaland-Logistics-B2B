@@ -206,7 +206,7 @@
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm italic">$</span>
                                     <input type="number" step="0.01" name="tiers[{{ $index }}][price_per_cft]" 
                                            class="w-full pl-7 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-brand-700 focus:border-brand-700 outline-none transition-all" 
-                                           required placeholder="0.00">
+                                           placeholder="0.00">
                                 </div>
                             </div>
                         @endforeach
@@ -296,7 +296,7 @@
                                     <input type="number" step="0.01" name="tiers[{{ $index }}][price_per_cft]" 
                                            x-model="editingRate.tier_prices['{{ $vol }}']"
                                            class="w-full pl-7 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-brand-700 focus:border-brand-700 outline-none transition-all" 
-                                           required placeholder="0.00">
+                                           placeholder="0.00">
                                 </div>
                             </div>
                         @endforeach

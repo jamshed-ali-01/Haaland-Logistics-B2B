@@ -11,7 +11,7 @@ class Quote extends Model
 {
     protected $fillable = [
         'user_id', 'reference_number', 'origin_id', 'country_id', 'region_id', 'destination_warehouse_id',
-        'volume_cbm', 'volume_cft', 'billable_volume_cft', 'rate_per_cft', 'total_price', 'service_type_id', 'service_type', 'status'
+        'volume_cbm', 'volume_cft', 'billable_volume_cft', 'rate_per_cft', 'total_price', 'service_type_id', 'service_type', 'status', 'admin_notes'
     ];
 
     public function destination()
@@ -58,7 +58,7 @@ class Quote extends Model
                 'title' => 'New Quote Request',
                 'message' => "A new quote request ({$quote->reference_number}) has been submitted by {$quote->user->name}.",
                 'type' => 'info',
-                'link' => route('dashboard'), // Change to admin quotes if exists
+                'link' => route('admin.quotes.show', $quote),
                 'icon' => 'document-text'
             ]));
         });

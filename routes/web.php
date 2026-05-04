@@ -27,8 +27,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/{user}/pause', [AdminController::class, 'pauseUser'])->name('users.pause');
     
     Route::get('/quotes', [AdminController::class, 'quotes'])->name('quotes.index');
+    Route::get('/quotes/{quote}', [AdminController::class, 'showQuote'])->name('quotes.show');
     Route::post('/quotes/{quote}/accept', [AdminController::class, 'acceptQuote'])->name('quotes.accept');
     Route::post('/quotes/{quote}/reject', [AdminController::class, 'rejectQuote'])->name('quotes.reject');
+    Route::post('/quotes/{quote}/notes', [AdminController::class, 'updateQuoteNotes'])->name('quotes.update-notes');
     Route::get('/leads', [AdminController::class, 'leads'])->name('leads');
     
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
@@ -54,6 +56,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     Route::get('/external-shipments', [AdminController::class, 'externalShipments'])->name('external-shipments');
     Route::post('/external-shipments', [AdminController::class, 'storeExternalShipment'])->name('external-shipments.store');
+    Route::get('/operations', [AdminController::class, 'operations'])->name('ops.index');
 
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings.index');
     Route::post('/bookings/{booking}/toggle-status', [AdminController::class, 'toggleBookingStatus'])->name('bookings.toggle-status');

@@ -69,7 +69,7 @@
                             <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Service Logic</label>
                             <div class="grid grid-cols-2 gap-4">
                                 <label class="relative cursor-pointer">
-                                    <input type="radio" name="service_type" value="Standard" @change="calculate()" class="peer sr-only" checked>
+                                    <input type="radio" name="service_type" value="Warehouse to Door" @change="calculate()" class="peer sr-only" checked>
                                     <div class="p-4 border border-slate-200 rounded-2xl peer-checked:border-brand-500 peer-checked:bg-brand-50 transition-all text-center">
                                         <span class="block text-sm font-bold text-slate-900 uppercase tracking-widest">Standard Consolidation</span>
                                         <span class="text-[10px] text-slate-500">Warehouse to Door</span>
@@ -89,17 +89,25 @@
 
                 <!-- Live Preview Sidebar -->
                 <div class="space-y-6">
-                    <div class="premium-card sticky top-24 border-brand-500/20 shadow-xl shadow-brand-500/5">
+                    <div class="premium-card border-brand-500/20 shadow-xl shadow-brand-500/5">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-brand-700 mb-4 italic">Quote Summary</h4>
                         
-                        <div class="space-y-4 mb-6">
                             <div class="flex justify-between border-b border-slate-100 pb-2">
-                                <span class="text-xs text-slate-500">Taxable Vol.</span>
-                                <span class="text-sm font-bold text-slate-900"><span x-text="taxableCft">0.00</span> CFT</span>
+                                <span class="text-xs text-slate-500">Actual Vol.</span>
+                                <span class="text-sm font-bold text-slate-900"><span x-text="actualCft">0.00</span> CFT</span>
                             </div>
                             <div class="flex justify-between border-b border-slate-100 pb-2">
-                                <span class="text-xs text-slate-500">Min. Applied</span>
-                                <span class="text-xs font-bold text-brand-700" x-text="taxableCft <= 100 ? 'YES' : 'NO'"></span>
+                                <span class="text-xs text-slate-500">Billable Vol. (Min)</span>
+                                <span class="text-sm font-bold text-brand-700"><span x-text="taxableCft">0.00</span> CFT</span>
+                            </div>
+                        </div>
+
+                        <!-- Minimum Volume Warning -->
+                        <div x-show="actualCft < minVol && volume > 0" x-cloak class="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <div>
+                                <p class="text-[10px] font-bold text-amber-800 uppercase tracking-tight">Minimum Applied</p>
+                                <p class="text-[10px] text-amber-700 leading-tight mt-0.5">Your volume is below the <span x-text="minVol"></span> CFT minimum. Pricing is based on the minimum volume.</p>
                             </div>
                         </div>
 
@@ -138,6 +146,8 @@
                 estimatedTotal: null,
                 loading: false,
                 submitting: false,
+                minVol: {{ $minVol }},
+                actualCft: 0,
                 
                 init() {
                     if (this.countryId) {
@@ -164,7 +174,8 @@
                 
                 async calculate() {
                     let cft = this.unit === 'CBM' ? this.volume * 35.3147 : this.volume;
-                    this.taxableCft = Math.max(cft, 100).toFixed(2);
+                    this.actualCft = parseFloat(cft).toFixed(2);
+                    this.taxableCft = Math.max(cft, this.minVol).toFixed(2);
 
                     if (this.originId && this.countryId && this.volume > 0) {
                         this.loading = true;

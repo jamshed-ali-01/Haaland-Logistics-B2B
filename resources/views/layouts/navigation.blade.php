@@ -67,26 +67,35 @@
                 showNotifications: false,
                 init() {
                     this.fetchNotifications();
+                    // Polling as fallback for real-time notifications
+                    setInterval(() => this.fetchNotifications(), 10000); // Check every 10 seconds
+
                     if (window.Echo) {
                         window.Echo.private(`App.Models.User.{{ Auth::id() }}`)
                             .notification((notification) => {
-                                this.notifications.unshift({
-                                    id: notification.id,
-                                    data: notification,
-                                    created_at: 'Just now',
-                                    read_at: null
-                                });
-                                this.unreadCount++;
-                                // Optional: Play sound or show toast
+                                this.fetchNotifications(); // Refresh full state on push
                             });
                     }
                 },
+                playNotificationSound() {
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play().catch(e => console.log('Audio play failed:', e));
+                },
                 fetchNotifications() {
-                    fetch('{{ route('notifications.index') }}')
+                    fetch('{{ route('notifications.fetch') }}')
                         .then(res => res.json())
                         .then(data => {
+                            const oldUnread = this.unreadCount;
                             this.notifications = data.notifications;
                             this.unreadCount = data.unread_count;
+                            
+                            // Show toast and play sound if new notification arrived
+                            if (this.unreadCount > oldUnread && oldUnread !== 0) {
+                                this.playNotificationSound();
+                                window.dispatchEvent(new CustomEvent('toast', { 
+                                    detail: { message: 'New notification received!', type: 'info' }
+                                }));
+                            }
                         });
                 },
                 markAsRead(id) {

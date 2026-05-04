@@ -50,7 +50,9 @@ class QuoteController extends Controller
             'volume_unit' => request('volume_unit'),
         ];
 
-        return view('quotes.create', compact('warehouses', 'countries', 'prefill'));
+        $minVol = \App\Models\SystemSetting::where('key', 'minimum_volume')->first()?->value ?? 100;
+
+        return view('quotes.create', compact('warehouses', 'countries', 'prefill', 'minVol'));
     }
 
     public function calculate(Request $request)

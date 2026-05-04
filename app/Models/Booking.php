@@ -12,7 +12,7 @@ class Booking extends Model
     protected $fillable = [
         'quote_id', 'user_id', 'booking_number', 'drop_off_date', 
         'drop_off_time', 'status', 'departure_id', 'is_special_request',
-        'external_reference', 'external_volume_cft', 'destination_warehouse_id'
+        'external_reference', 'external_volume_cft', 'destination_warehouse_id', 'admin_notes'
     ];
 
     public function destination()

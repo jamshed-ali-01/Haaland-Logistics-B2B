@@ -78,6 +78,19 @@ class AdminController extends Controller
         return view('admin.quotes', compact('quotes'));
     }
 
+    public function showQuote(Quote $quote)
+    {
+        $quote->load(['user', 'origin', 'country', 'region', 'destination', 'booking']);
+        return view('admin.quote_details', compact('quote'));
+    }
+
+    public function updateQuoteNotes(Request $request, Quote $quote)
+    {
+        $request->validate(['admin_notes' => 'nullable|string']);
+        $quote->update(['admin_notes' => $request->admin_notes]);
+        return back()->with('success', 'Internal notes updated successfully.');
+    }
+
     public function acceptQuote(Quote $quote)
     {
         if ($quote->booking) {
@@ -100,6 +113,16 @@ class AdminController extends Controller
     public function rejectQuote(Quote $quote)
     {
         $quote->update(['status' => 'rejected']);
+
+        // Notify User
+        $quote->user->notify(new \App\Notifications\SystemNotification([
+            'title' => 'Quote Update',
+            'message' => 'Your quote ' . $quote->reference_number . ' has been reviewed and rejected.',
+            'type' => 'error',
+            'link' => route('quotes.index'),
+            'icon' => 'x-circle'
+        ]));
+
         return back()->with('success', "Quote {$quote->reference_number} has been rejected.");
     }
 
@@ -202,7 +225,7 @@ class AdminController extends Controller
             'service_type_id' => 'required|exists:service_types,id',
             'tiers' => 'required|array',
             'tiers.*.min_volume' => 'required|numeric',
-            'tiers.*.price_per_cft' => 'required|numeric',
+            'tiers.*.price_per_cft' => 'nullable|numeric',
         ]);
 
         $rate = Rate::create([
@@ -217,11 +240,13 @@ class AdminController extends Controller
         ]);
 
         foreach ($request->tiers as $tier) {
-            RateTier::create([
-                'rate_id' => $rate->id,
-                'min_volume' => $tier['min_volume'],
-                'price_per_cft' => $tier['price_per_cft'],
-            ]);
+            if (isset($tier['price_per_cft']) && $tier['price_per_cft'] !== '') {
+                RateTier::create([
+                    'rate_id' => $rate->id,
+                    'min_volume' => $tier['min_volume'],
+                    'price_per_cft' => $tier['price_per_cft'],
+                ]);
+            }
         }
 
         return back()->with('success', 'Rate created successfully.');
@@ -236,7 +261,7 @@ class AdminController extends Controller
             'service_type_id' => 'required|exists:service_types,id',
             'tiers' => 'required|array',
             'tiers.*.min_volume' => 'required|numeric',
-            'tiers.*.price_per_cft' => 'required|numeric',
+            'tiers.*.price_per_cft' => 'nullable|numeric',
         ]);
 
         $rate->update([
@@ -252,11 +277,13 @@ class AdminController extends Controller
         // Recreate tiers to ensure clean state
         $rate->tiers()->delete();
         foreach ($request->tiers as $tier) {
-            RateTier::create([
-                'rate_id' => $rate->id,
-                'min_volume' => $tier['min_volume'],
-                'price_per_cft' => $tier['price_per_cft'],
-            ]);
+            if (isset($tier['price_per_cft']) && $tier['price_per_cft'] !== '') {
+                RateTier::create([
+                    'rate_id' => $rate->id,
+                    'min_volume' => $tier['min_volume'],
+                    'price_per_cft' => $tier['price_per_cft'],
+                ]);
+            }
         }
 
         return back()->with('success', 'Rate updated successfully.');
@@ -417,6 +444,16 @@ class AdminController extends Controller
         return view('admin.external_shipments', compact('bookings', 'users', 'departures'));
     }
 
+    public function operations()
+    {
+        $departures = Departure::with(['bookings.user', 'bookings.quote'])
+            ->where('departure_date', '>=', now()->subDays(30))
+            ->orderBy('departure_date', 'asc')
+            ->get();
+
+        return view('admin.operations', compact('departures'));
+    }
+
     public function storeExternalShipment(Request $request)
     {
         $request->validate([
@@ -460,6 +497,15 @@ class AdminController extends Controller
     public function approveUser(User $user)
     {
         $user->update(['status' => 'approved']);
+
+        // Notify User
+        $user->notify(new \App\Notifications\SystemNotification([
+            'title' => 'Account Approved',
+            'message' => 'Your Haaland Logistics account has been approved. You can now start booking shipments.',
+            'type' => 'success',
+            'link' => route('dashboard'),
+            'icon' => 'user-check'
+        ]));
 
         return back()->with('success', "User {$user->name} has been approved.");
     }

@@ -6,7 +6,7 @@
     <div class="space-y-6">
         <!-- Header Section -->
         <div class="flex justify-between items-center animate-fade-in-up">
-            <h3 class="text-xl font-bold text-white font-outfit">Your Shipments</h3>
+            <h3 class="text-xl font-bold text-slate-900 font-outfit">Your Shipments</h3>
             <a href="{{ route('quotes.create') }}" class="btn-primary flex items-center gap-2 no-underline">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 New Quote
@@ -25,7 +25,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-white/2 text-slate-400 text-[10px] uppercase tracking-widest font-bold">
+                        <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
                             <th class="px-6 py-4">Quote ID</th>
                             <th class="px-6 py-4">Route</th>
                             <th class="px-6 py-4">Volume (Taxable)</th>
@@ -38,7 +38,7 @@
                         @foreach($quotes as $quote)
                             <tr class="hover:bg-white/[0.05] transition-all group cursor-pointer border-l-2 border-transparent hover:border-brand-500" onclick="window.location='#'">
                                 <td class="px-6 py-4">
-                                    <span class="text-sm font-bold text-slate-100 uppercase tracking-tight group-hover:text-brand-400 transition-colors">{{ $quote->reference_number }}</span>
+                                    <span class="text-sm font-bold text-slate-900 uppercase tracking-tight group-hover:text-brand-400 transition-colors">{{ $quote->reference_number }}</span>
                                     <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-0.5">{{ $quote->created_at->format('M d, Y') }}</p>
                                 </td>
                                 <td class="px-6 py-4">
@@ -83,7 +83,7 @@
                             <tr>
                                 <td colspan="6" class="px-6 py-20 text-center">
                                     <div class="max-w-xs mx-auto">
-                                        <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 shadow-xl">
+                                        <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200 shadow-sm">
                                             <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </div>
                                         <p class="text-slate-400 text-sm font-medium">No quotes found yet.</p>

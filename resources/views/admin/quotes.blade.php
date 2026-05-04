@@ -25,7 +25,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 italic">
                         @foreach($quotes as $quote)
-                            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='#'">
+                            <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='{{ route('admin.quotes.show', $quote) }}'">
                                 <td class="px-6 py-5">
                                     <p class="text-sm font-bold text-slate-900">{{ $quote->reference_number }}</p>
                                     <p class="text-[10px] text-slate-400 uppercase font-medium">{{ $quote->created_at->format('M d, Y H:i') }}</p>
@@ -79,7 +79,7 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        <a href="#" class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-slate-200 transition-all border border-slate-200 no-underline">
+                                        <a href="{{ route('admin.quotes.show', $quote) }}" class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-slate-200 transition-all border border-slate-200 no-underline">
                                             View
                                         </a>
                                     </div>
