@@ -67,7 +67,7 @@
                                 </td>
                                 <td class="px-6 py-5 text-right" onclick="event.stopPropagation()">
                                     <div class="flex justify-end gap-2">
-                                        @if($quote->status === 'active')
+                                        @if($quote->status === 'active' || $quote->status === 'requested')
                                             <button 
                                                 x-on:click.prevent="acceptUrl = '{{ route('admin.quotes.accept', $quote) }}'; quoteRef = '{{ $quote->reference_number }}'; showAcceptModal = true"
                                                 class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20">

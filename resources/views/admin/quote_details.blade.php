@@ -11,7 +11,7 @@
                 Back to List
             </a>
             <div class="flex items-center gap-3">
-                @if($quote->status === 'active')
+                @if($quote->status === 'active' || $quote->status === 'requested')
                     <!-- Accept Button -->
                     <x-primary-button type="button" x-on:click.prevent="$dispatch('open-modal', 'confirm-booking')" class="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         {{ __('Accept & Book') }}
