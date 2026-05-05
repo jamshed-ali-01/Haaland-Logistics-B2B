@@ -123,6 +123,8 @@ class QuoteController extends Controller
             'billable_volume_cft' => $calculation['billable_cft'],
             'rate_per_cft' => $calculation['rate_per_cft'],
             'total_price' => $calculation['total_price'],
+            'shipping_service_id' => $calculation['shipping_service_id'],
+            'service_type_id' => $calculation['service_type_id'],
             'service_type' => $request->service_type,
             'status' => 'active'
         ]);

@@ -272,17 +272,17 @@
                                         <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Volume</label>
                                         <div class="flex items-center gap-4">
                                             <label class="flex items-center gap-2 cursor-pointer group">
-                                                <input type="radio" x-model="unit" value="CFT" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                                <input type="radio" x-model="unit" value="CFT" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]">
                                                 <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors uppercase">CFT</span>
                                             </label>
                                             <label class="flex items-center gap-2 cursor-pointer group">
-                                                <input type="radio" x-model="unit" value="CBM" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                                <input type="radio" x-model="unit" value="CBM" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]">
                                                 <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors uppercase">CBM</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="relative">
-                                        <input type="number" x-model="volume" @input="calculate()" class="input-premium w-full !bg-slate-50/50 !border-slate-200 !text-xl font-bold font-mono !py-4" placeholder="0.00">
+                                        <input type="number" x-model="volume" class="input-premium w-full !bg-slate-50/50 !border-slate-200 !text-xl font-bold font-mono !py-4" placeholder="0.00">
                                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                             <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                         </div>
@@ -294,7 +294,7 @@
                                     <div class="grid grid-cols-2 gap-3">
                                         <template x-for="w in warehouses" :key="w.id">
                                             <label class="relative cursor-pointer">
-                                                <input type="radio" x-model="originId" :value="w.id" class="sr-only peer" @change="calculate()">
+                                                <input type="radio" x-model="originId" :value="w.id" class="sr-only peer">
                                                 <div class="p-3 border border-slate-200 rounded-xl text-center peer-checked:border-[#1A5161] peer-checked:bg-[#1A5161]/5 transition-all">
                                                     <span class="block text-[10px] font-bold text-slate-400 peer-checked:text-[#1A5161] uppercase tracking-wider" x-text="w.name"></span>
                                                 </div>
@@ -321,7 +321,7 @@
                                             </template>
                                         </select>
                                         <div x-show="regions.length > 0">
-                                            <select x-model="regionId" @change="calculate()" class="input-premium w-full !bg-slate-50/50">
+                                            <select x-model="regionId" class="input-premium w-full !bg-slate-50/50">
                                                 <option value="">Select Region / Logic</option>
                                                 <template x-for="r in regions" :key="r.id">
                                                     <option :value="r.id" x-text="r.name"></option>
@@ -335,14 +335,14 @@
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Service Type</label>
                                     <div class="space-y-3">
                                         <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-[#1A5161]/30 transition-all group">
-                                            <input type="radio" x-model="serviceType" value="Warehouse to Door" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" checked @change="calculate()">
+                                            <input type="radio" x-model="serviceType" value="Warehouse to Door" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" checked>
                                             <div>
                                                 <p class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Warehouse to Door</p>
                                                 <p class="text-[8px] text-slate-400 uppercase tracking-widest">Full consolidation & delivery</p>
                                             </div>
                                         </label>
                                         <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer hover:border-[#1A5161]/30 transition-all group">
-                                            <input type="radio" x-model="serviceType" value="Warehouse to Port" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]" @change="calculate()">
+                                            <input type="radio" x-model="serviceType" value="Warehouse to Port" class="w-4 h-4 text-[#1A5161] focus:ring-[#1A5161]">
                                             <div>
                                                 <p class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Warehouse to Port</p>
                                                 <p class="text-[8px] text-slate-400 uppercase tracking-widest">Client pickup at destination</p>
@@ -357,10 +357,6 @@
                             <textarea x-model="notes" class="input-premium w-full !bg-slate-50/20 text-xs" rows="3" placeholder="Additional Notes: Vehicle, Pallet, Special Requirements..."></textarea>
                             <div class="flex flex-wrap gap-4 mt-6">
                                 <button type="button" @click="calculate()" class="px-8 py-4 bg-[#1A5161] text-white font-bold rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase tracking-widest text-[10px]">Calculate Quote</button>
-                                <button type="button" @click="bookSpace()" :disabled="!calculation" class="px-8 py-4 bg-white border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition-all uppercase tracking-widest text-[10px] flex items-center gap-2 disabled:opacity-50">
-                                    <svg class="w-4 h-4 text-[#1A5161]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path></svg>
-                                    Book Space
-                                </button>
                                 <button type="button" @click="resetForm()" class="px-8 py-4 text-slate-400 font-bold hover:text-slate-600 transition-all uppercase tracking-widest text-[10px]">Reset</button>
                             </div>
                         </div>
@@ -509,7 +505,6 @@
                             const country = this.countries.find(c => c.id == this.countryId);
                             this.regions = country ? country.regions : [];
                             this.regionId = '';
-                            this.calculate();
                         },
 
                         async calculate() {

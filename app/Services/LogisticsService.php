@@ -50,11 +50,24 @@ class LogisticsService
         // Apply minimum volume rule in CBM
         $billableCbm = max($volCbm, $minVolCbm);
 
-        // Fetch Base Rate Entry (Source of Truth is EUR/CBM)
-        $rate = Rate::where('origin_id', $originId)
-            ->where('country_id', $countryId)
-            ->where('service_type', $serviceType)
-            ->when($regionId, function($q) use ($regionId) {
+        // Resolve Service Type / Shipping Service if passed as name
+        $rateQuery = Rate::where('origin_id', $originId)
+            ->where('country_id', $countryId);
+
+        // Try to match service_type parameter to either column or relation
+        if ($serviceType) {
+            $rateQuery->where(function($q) use ($serviceType) {
+                $q->where('service_type', $serviceType)
+                  ->orWhereHas('serviceType', function($sq) use ($serviceType) {
+                      $sq->where('name', $serviceType);
+                  })
+                  ->orWhereHas('shippingService', function($sq) use ($serviceType) {
+                      $sq->where('name', $serviceType);
+                  });
+            });
+        }
+
+        $rate = $rateQuery->when($regionId, function($q) use ($regionId) {
                 return $q->where('region_id', $regionId);
             }, function($q) {
                 return $q->whereNull('region_id');
@@ -63,11 +76,22 @@ class LogisticsService
 
         // Fallback to Country (Region NULL)
         if (!$rate && $regionId) {
-            $rate = Rate::where('origin_id', $originId)
+            $fallbackQuery = Rate::where('origin_id', $originId)
                 ->where('country_id', $countryId)
-                ->where('service_type', $serviceType)
-                ->whereNull('region_id')
-                ->first();
+                ->whereNull('region_id');
+
+            if ($serviceType) {
+                $fallbackQuery->where(function($q) use ($serviceType) {
+                    $q->where('service_type', $serviceType)
+                      ->orWhereHas('serviceType', function($sq) use ($serviceType) {
+                          $sq->where('name', $serviceType);
+                      })
+                      ->orWhereHas('shippingService', function($sq) use ($serviceType) {
+                          $sq->where('name', $serviceType);
+                      });
+                });
+            }
+            $rate = $fallbackQuery->first();
         }
 
         if (!$rate) {
@@ -117,7 +141,9 @@ class LogisticsService
             'origin_handling_usd' => round($originHandlingUsd, 2),
             'total_price' => round($totalPriceUsd, 2),
             'applied_min' => $cft < $minVol,
-            'destination_warehouse_id' => $destinationWarehouseId
+            'destination_warehouse_id' => $destinationWarehouseId,
+            'shipping_service_id' => $rate->shipping_service_id,
+            'service_type_id' => $rate->service_type_id
         ];
     }
 }
