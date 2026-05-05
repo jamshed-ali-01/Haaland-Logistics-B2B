@@ -70,17 +70,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    @if($quote->status === 'active')
-                                        <button 
-                                            @click.stop="bookUrl = '{{ route('bookings.store', $quote) }}'; quoteRef = '{{ $quote->reference_number }}'; showBookModal = true"
-                                            class="btn-primary no-underline inline-block text-[10px] font-bold uppercase px-3 py-2 rounded-lg transition-all shadow-lg shadow-brand-600/20">
-                                            Request Booking
-                                        </button>
-                                    @else
-                                        <button class="bg-white/5 text-slate-500 text-[10px] font-bold uppercase px-3 py-2 rounded-lg cursor-not-allowed">
-                                            {{ ucfirst($quote->status) }}
-                                        </button>
-                                    @endif
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                        {{ ucfirst($quote->status) }}
+                                    </span>
                                 </td>
                         @endforeach
                         @if($quotes->isEmpty())

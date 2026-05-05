@@ -40,7 +40,7 @@ class SystemNotification extends Notification
         return (new MailMessage)
                     ->cc(config('mail.from.address'))
                     ->subject($this->details['title'])
-                    ->greeting('Hello Admin,')
+                    ->greeting('Hello ' . $notifiable->name . ',')
                     ->line($this->details['message'])
                     ->action('View Details', $this->details['link'])
                     ->line('Thank you for using our platform!');
